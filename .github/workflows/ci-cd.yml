@@ -20,7 +20,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
+          aws-region: us-east-1
       - name: Create AWS Lambda Function
         run: |
           aws lambda create-function --function-name LambdaHandler --runtime java21 --handler com.fiap.handler.LambdaHandler::handleRequest --role arn:aws:iam::656472741759:role/lambda-ex --zip-file fileb://target/aws-lambda-java-authentication-0.0.1.jar
