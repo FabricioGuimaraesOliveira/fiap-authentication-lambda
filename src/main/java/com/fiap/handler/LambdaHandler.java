@@ -4,11 +4,14 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fiap.gateway.ClienteGateway;
+import com.fiap.util.JwtTokenUtil;
 import com.google.gson.Gson;
 
 public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final Gson gson = new Gson();
+    ClienteGateway clienteGateway = new ClienteGateway();
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
@@ -34,7 +37,14 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
                 return new APIGatewayProxyResponseEvent().withStatusCode(400).withBody("{ \"error\": \"Invalid CPF - Must have 11 digits\" }");
             }
 
-            return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody("{ \"success\": true }");
+            var response = clienteGateway.getClientePorCPF(cpf);
+            if (response.isPresent()) {
+                var token = JwtTokenUtil.generateToken(cpf);
+                var responseBody = "{ \"token\": \"" + token + "\" }";
+                return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody(responseBody);
+            } else {
+                return new APIGatewayProxyResponseEvent().withStatusCode(403).withBody("{ \"token\": false }");
+            }
         } catch (Exception e) {
             logger.log("Error processing request: " + e.getMessage());
             return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("{ \"error\": \"Internal Server Error\" }");
