@@ -1,0 +1,32 @@
+name: AWS Lambda CICD
+on:
+  push:
+    branches: [main]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build Project
+        run: mvn clean install
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+      - name: Create AWS Lambda Function
+        run: |
+          aws lambda create-function --function-name LambdaHandler --runtime java21 --handler com.fiap.handler.LambdaHandler::handleRequest --role arn:aws:iam::656472741759:role/lambda-ex --zip-file fileb://target/aws-lambda-java-authentication-0.0.1.jar
+        continue-on-error: true  
+      - name: Update Lambda Function    
+        run: aws lambda update-function-code --function-name LambdaHandler --zip-file fileb://target/aws-lambda-java-authentication-0.0.1.jar
+          
+      
+    
