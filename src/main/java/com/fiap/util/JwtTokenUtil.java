@@ -1,12 +1,8 @@
 package com.fiap.util;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-
-import javax.crypto.SecretKey;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 
 public class JwtTokenUtil {
 
@@ -14,17 +10,16 @@ public class JwtTokenUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
-    private static final Duration EXPIRATION_DURATION = Duration.ofHours(1); // Expiration time: 1 hour
-
     public static String generateToken(String cpf) {
-        Instant expirationTime = Instant.now().plus(EXPIRATION_DURATION);
-        Date expiryDate = Date.from(expirationTime);
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("fiap");
 
-        return Jwts.builder()
-                .claim("cpf", cpf)
-                .setExpiration(expiryDate)
-                .signWith(SECRET_KEY)
-                .compact();
+            return JWT.create()
+                    .withClaim("cpf", cpf)
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            exception.printStackTrace();
+            return null;
+        }
     }
 }

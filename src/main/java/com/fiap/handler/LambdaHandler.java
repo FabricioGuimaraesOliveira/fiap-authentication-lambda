@@ -37,7 +37,7 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
                 return new APIGatewayProxyResponseEvent().withStatusCode(400).withBody("{ \"error\": \"Invalid CPF - Must have 11 digits\" }");
             }
 
-            var response = clienteGateway.getClientePorCPF(cpf);
+            var response  = clienteGateway.getClientePorCPF(cpf);
             if (response.isPresent()) {
                 var token = JwtTokenUtil.generateToken(cpf);
                 var responseBody = "{ \"token\": \"" + token + "\" }";
