@@ -31,4 +31,5 @@ public class Cliente {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    
 }
